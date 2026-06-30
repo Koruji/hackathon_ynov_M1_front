@@ -101,6 +101,55 @@ setInterval(loadMarketData, 60000);
 // ── CHAT ──
 let messages = [];
 let isTyping = false;
+let currentConvItem = null;
+
+// Cache des conversations : Map<item DOM element, { messages, html }>
+const convCache = new Map();
+
+function saveCurrentConv() {
+  if (!currentConvItem) return;
+  convCache.set(currentConvItem, {
+    messages: [...messages],
+    html: document.getElementById('chat-area').innerHTML,
+  });
+}
+
+function loadConv(item) {
+  const cached = convCache.get(item);
+  if (!cached) return;
+  messages = [...cached.messages];
+  document.getElementById('chat-area').innerHTML = cached.html;
+  document.getElementById('chat-area').scrollTop = document.getElementById('chat-area').scrollHeight;
+  const chips = document.getElementById('chip-suggestions');
+  if (chips) chips.style.display = 'none';
+}
+
+function createHistoryItem(title) {
+  const list = document.getElementById('history-list');
+  const empty = list.querySelector('.history-empty');
+  if (empty) empty.remove();
+
+  list.querySelectorAll('.history-item').forEach(i => i.classList.remove('active'));
+
+  const item = document.createElement('div');
+  item.className = 'history-item active';
+  item.innerHTML = `
+    <div class="history-item-title">${title}</div>
+    <div class="history-item-meta">${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</div>
+  `;
+  item.addEventListener('click', () => {
+    if (item === currentConvItem) return;
+    saveCurrentConv();
+    list.querySelectorAll('.history-item').forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+    currentConvItem = item;
+    isTyping = false;
+    document.getElementById('send-btn').disabled = false;
+    loadConv(item);
+  });
+  list.prepend(item);
+  currentConvItem = item;
+}
 
 function autoResize(el) {
   el.style.height = 'auto';
@@ -164,6 +213,11 @@ async function sendMessage() {
   isTyping = true;
   document.getElementById('send-btn').disabled = true;
 
+  if (messages.length === 0) {
+    const title = text.length > 40 ? text.slice(0, 40).trimEnd() + '…' : text;
+    createHistoryItem(title);
+  }
+
   addMessage('user', text);
   messages.push({ role: 'user', content: text });
   showTyping();
@@ -219,8 +273,10 @@ function sendSuggestion(text) {
 }
 
 function newChat() {
+  saveCurrentConv();
   messages = [];
   isTyping = false;
+  currentConvItem = null;
   document.getElementById('send-btn').disabled = false;
   document.getElementById('chat-area').innerHTML = `
     <div class="welcome" id="welcome-screen">
