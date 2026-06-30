@@ -101,6 +101,55 @@ setInterval(loadMarketData, 60000);
 // ── CHAT ──
 let messages = [];
 let isTyping = false;
+let currentConvItem = null;
+
+// Cache des conversations : Map<item DOM element, { messages, html }>
+const convCache = new Map();
+
+function saveCurrentConv() {
+  if (!currentConvItem) return;
+  convCache.set(currentConvItem, {
+    messages: [...messages],
+    html: document.getElementById('chat-area').innerHTML,
+  });
+}
+
+function loadConv(item) {
+  const cached = convCache.get(item);
+  if (!cached) return;
+  messages = [...cached.messages];
+  document.getElementById('chat-area').innerHTML = cached.html;
+  document.getElementById('chat-area').scrollTop = document.getElementById('chat-area').scrollHeight;
+  const chips = document.getElementById('chip-suggestions');
+  if (chips) chips.style.display = 'none';
+}
+
+function createHistoryItem(title) {
+  const list = document.getElementById('history-list');
+  const empty = list.querySelector('.history-empty');
+  if (empty) empty.remove();
+
+  list.querySelectorAll('.history-item').forEach(i => i.classList.remove('active'));
+
+  const item = document.createElement('div');
+  item.className = 'history-item active';
+  item.innerHTML = `
+    <div class="history-item-title">${title}</div>
+    <div class="history-item-meta">${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</div>
+  `;
+  item.addEventListener('click', () => {
+    if (item === currentConvItem) return;
+    saveCurrentConv();
+    list.querySelectorAll('.history-item').forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+    currentConvItem = item;
+    isTyping = false;
+    document.getElementById('send-btn').disabled = false;
+    loadConv(item);
+  });
+  list.prepend(item);
+  currentConvItem = item;
+}
 
 function autoResize(el) {
   el.style.height = 'auto';
@@ -133,6 +182,7 @@ function addMessage(role, content) {
   row.innerHTML = `${avatarHTML}<div><div class="message-bubble">${content}</div><div class="message-time">${nowTime()}</div></div>`;
   area.appendChild(row);
   area.scrollTop = area.scrollHeight;
+  return row;
 }
 
 function showTyping() {
@@ -163,22 +213,51 @@ async function sendMessage() {
   isTyping = true;
   document.getElementById('send-btn').disabled = true;
 
+  if (messages.length === 0) {
+    const title = text.length > 40 ? text.slice(0, 40).trimEnd() + '…' : text;
+    createHistoryItem(title);
+  }
+
   addMessage('user', text);
   messages.push({ role: 'user', content: text });
   showTyping();
 
   try {
+    const prompt = messages.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n') + '\nAssistant:';
     const res = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: MODEL, messages, stream: false })
+      body: JSON.stringify({ model: MODEL, prompt, stream: true })
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    const reply = data.message?.content || 'Réponse vide.';
+
     removeTyping();
-    addMessage('bot', reply);
-    messages.push({ role: 'assistant', content: reply });
+    const bubbleRow = addMessage('bot', '');
+    const bubble = bubbleRow.querySelector('.message-bubble');
+    let fullReply = '';
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const lines = decoder.decode(value, { stream: true }).split('\n').filter(l => l.trim());
+      for (const line of lines) {
+        try {
+          const data = JSON.parse(line);
+          if (data.response) {
+            fullReply += data.response;
+            bubble.innerHTML = marked.parse(fullReply);
+            document.getElementById('chat-area').scrollTop = document.getElementById('chat-area').scrollHeight;
+          }
+          if (data.done) break;
+        } catch {}
+      }
+    }
+
+    messages.push({ role: 'assistant', content: fullReply });
   } catch {
     removeTyping();
     addMessage('bot', `⚠️ Impossible de joindre le serveur d'inférence. Vérifiez que le serveur est démarré sur ${API_URL}`);
@@ -194,8 +273,10 @@ function sendSuggestion(text) {
 }
 
 function newChat() {
+  saveCurrentConv();
   messages = [];
   isTyping = false;
+  currentConvItem = null;
   document.getElementById('send-btn').disabled = false;
   document.getElementById('chat-area').innerHTML = `
     <div class="welcome" id="welcome-screen">
