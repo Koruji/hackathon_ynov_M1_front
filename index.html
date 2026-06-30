@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TechCorp — Financial Assistant</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+
+    <div class="sidebar-icon active" title="Chat" onclick="showChat()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </div>
+
+    <div class="sidebar-icon" title="Marchés" onclick="showWip('Marchés & Indices', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    </div>
+
+    <div class="sidebar-icon" title="Portefeuille" onclick="showWip('Portefeuille', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/></svg>
+    </div>
+
+    <div class="sidebar-icon" title="Rapports" onclick="showWip('Rapports & Analyses', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    </div>
+
+    <div class="sidebar-icon" title="Paramètres" onclick="showWip('Paramètres', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+    </div>
+
+    <div class="sidebar-spacer"></div>
+    <div class="sidebar-avatar" title="Mon compte">TC</div>
+  </nav>
+
+  <!-- HISTORY PANEL -->
+  <aside class="history-panel">
+    <div class="history-header">
+      <h2>Conversations</h2>
+      <button class="new-chat-btn" onclick="newChat()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nouvelle conversation
+      </button>
+    </div>
+
+    <div class="history-search">
+      <input type="text" placeholder="Rechercher..." />
+    </div>
+
+    <div class="history-list">
+      <div class="history-group-label">Aujourd'hui</div>
+      <div class="history-item active">
+        <div class="history-item-title">Taux d'intérêt BCE</div>
+        <div class="history-item-meta">Il y a 2 minutes</div>
+      </div>
+      <div class="history-item">
+        <div class="history-item-title">Analyse portefeuille actions</div>
+        <div class="history-item-meta">Il y a 1 heure</div>
+      </div>
+
+      <div class="history-group-label history-group-label--spaced">Hier</div>
+      <div class="history-item">
+        <div class="history-item-title">Stratégie investissement long terme</div>
+        <div class="history-item-meta">Hier, 14:32</div>
+      </div>
+      <div class="history-item">
+        <div class="history-item-title">Impact inflation sur obligations</div>
+        <div class="history-item-meta">Hier, 11:05</div>
+      </div>
+      <div class="history-item">
+        <div class="history-item-title">Calculateur hypothèque</div>
+        <div class="history-item-meta">Hier, 09:18</div>
+      </div>
+
+      <div class="history-group-label history-group-label--spaced">Cette semaine</div>
+      <div class="history-item">
+        <div class="history-item-title">Analyse crypto Bitcoin</div>
+        <div class="history-item-meta">Lun. 27 juin</div>
+      </div>
+      <div class="history-item">
+        <div class="history-item-title">Diversification de portefeuille</div>
+        <div class="history-item-meta">Dim. 26 juin</div>
+      </div>
+      <div class="history-item">
+        <div class="history-item-title">Structures de marché économiques</div>
+        <div class="history-item-meta">Sam. 25 juin</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-bot">
+        <div class="bot-avatar">
+          <svg viewBox="0 0 24 24"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7H3a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2zM7 14v1a1 1 0 0 0 2 0v-1H7zm8 0v1a1 1 0 0 0 2 0v-1h-2zM3 20a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-1H3v1z"/></svg>
+          <div class="bot-status-dot"></div>
+        </div>
+        <div class="bot-info">
+          <span class="bot-name">FinBot — Phi-3.5-Financial</span>
+          <span class="bot-status">● En ligne</span>
+        </div>
+      </div>
+
+      <div class="topbar-spacer"></div>
+
+      <div class="kpi-ticker">
+        <div class="kpi-item">
+          <span class="kpi-label">CAC 40</span>
+          <span class="kpi-value" id="kpi-cac">—</span>
+          <span class="kpi-change" id="kpi-cac-chg">...</span>
+        </div>
+        <div class="kpi-item">
+          <span class="kpi-label">S&P 500</span>
+          <span class="kpi-value" id="kpi-sp">—</span>
+          <span class="kpi-change" id="kpi-sp-chg">...</span>
+        </div>
+        <div class="kpi-item" title="Taux directeur BCE — mis à jour lors des réunions du Conseil des gouverneurs">
+          <span class="kpi-label">BCE Rate ℹ</span>
+          <span class="kpi-value" id="kpi-bce">3,65%</span>
+          <span class="kpi-label">Taux directeur</span>
+        </div>
+        <div class="kpi-item">
+          <span class="kpi-label">EUR/USD</span>
+          <span class="kpi-value" id="kpi-eur">—</span>
+          <span class="kpi-change" id="kpi-eur-chg">...</span>
+        </div>
+      </div>
+
+      <div class="topbar-divider"></div>
+
+      <span class="topbar-date" id="topbar-date"></span>
+    </header>
+
+    <!-- CHAT AREA -->
+    <div class="chat-area" id="chat-area">
+      <div class="welcome" id="welcome-screen">
+        <div class="welcome-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7H3a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2zM7 14v1a1 1 0 0 0 2 0v-1H7zm8 0v1a1 1 0 0 0 2 0v-1h-2zM3 20a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-1H3v1z"/></svg>
+        </div>
+        <div>
+          <h1>Bonjour, je suis FinBot</h1>
+          <p>Votre assistant financier spécialisé. Posez-moi vos questions sur les marchés, les investissements, la fiscalité ou l'économie.</p>
+        </div>
+        <div class="suggestion-grid">
+          <div class="suggestion-card" onclick="sendSuggestion('Comment les taux d\'intérêt de la BCE impactent-ils les prix des obligations ?')">
+            <div class="suggestion-card-icon">📈</div>
+            <div class="suggestion-card-text">Impact des taux BCE sur les obligations</div>
+            <div class="suggestion-card-sub">Taux d'intérêt & marchés</div>
+          </div>
+          <div class="suggestion-card" onclick="sendSuggestion('Quelles sont les différences entre les 4 structures de marché en économie ?')">
+            <div class="suggestion-card-icon">🏛️</div>
+            <div class="suggestion-card-text">Les 4 structures de marché en économie</div>
+            <div class="suggestion-card-sub">Microéconomie</div>
+          </div>
+          <div class="suggestion-card" onclick="sendSuggestion('Comment diversifier un portefeuille pour réduire les risques ?')">
+            <div class="suggestion-card-icon">💼</div>
+            <div class="suggestion-card-text">Diversifier son portefeuille</div>
+            <div class="suggestion-card-sub">Gestion de risque</div>
+          </div>
+          <div class="suggestion-card" onclick="sendSuggestion('Comment calculer les mensualités d\'un prêt immobilier ?')">
+            <div class="suggestion-card-icon">🏠</div>
+            <div class="suggestion-card-text">Calculer ses mensualités immobilières</div>
+            <div class="suggestion-card-sub">Prêt & hypothèque</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INPUT ZONE -->
+    <div class="input-zone" id="input-zone">
+      <div class="input-suggestions" id="chip-suggestions">
+        <span class="chip" onclick="sendSuggestion('Explique-moi la politique monétaire de la Fed')">Politique monétaire Fed</span>
+        <span class="chip" onclick="sendSuggestion('Quels sont les indicateurs clés à surveiller en bourse ?')">Indicateurs boursiers</span>
+        <span class="chip" onclick="sendSuggestion('Comment fonctionne l\'inflation ?')">Inflation</span>
+        <span class="chip" onclick="sendSuggestion('Explique le concept de quantitative easing')">Quantitative easing</span>
+      </div>
+
+      <div class="input-row">
+        <div class="input-wrapper">
+          <textarea
+            id="chat-input"
+            rows="1"
+            placeholder="Posez votre question financière..."
+            onkeydown="handleKey(event)"
+            oninput="autoResize(this)"
+          ></textarea>
+        </div>
+        <button class="send-btn" id="send-btn" onclick="sendMessage()">
+          <svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2L15 22 11 13 2 9 22 2z"/></svg>
+        </button>
+      </div>
+      <div class="input-footer">FinBot peut faire des erreurs. Vérifiez les informations importantes.</div>
+    </div>
+
+  </main>
+
+  <script src="config.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
