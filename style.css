@@ -606,6 +606,46 @@ body {
   50%       { transform: scale(1.5); opacity: 0.5; }
 }
 
+/* ── MARKDOWN DANS LES BULLES ── */
+.message-bubble p { margin-bottom: 8px; }
+.message-bubble p:last-child { margin-bottom: 0; }
+.message-bubble ul, .message-bubble ol { padding-left: 18px; margin-bottom: 8px; }
+.message-bubble li { margin-bottom: 4px; }
+.message-bubble strong { font-weight: 600; }
+.message-bubble em { font-style: italic; }
+.message-bubble code {
+  background: rgba(0,0,0,0.07);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 12px;
+}
+.message-bubble pre {
+  background: rgba(0,0,0,0.06);
+  padding: 10px 12px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+.message-bubble pre code { background: none; padding: 0; }
+.message-bubble h1, .message-bubble h2, .message-bubble h3 {
+  font-weight: 600;
+  margin-bottom: 6px;
+  margin-top: 10px;
+}
+.message-bubble h1 { font-size: 16px; }
+.message-bubble h2 { font-size: 15px; }
+.message-bubble h3 { font-size: 14px; }
+.message-bubble blockquote {
+  border-left: 3px solid var(--border);
+  padding-left: 10px;
+  color: var(--text-muted);
+  margin: 6px 0;
+}
+.message-row.user .message-bubble code { background: rgba(255,255,255,0.2); }
+.message-row.user .message-bubble pre { background: rgba(255,255,255,0.15); }
+.message-row.user .message-bubble blockquote { border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.8); }
+
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }

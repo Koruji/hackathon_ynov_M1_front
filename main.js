@@ -133,6 +133,7 @@ function addMessage(role, content) {
   row.innerHTML = `${avatarHTML}<div><div class="message-bubble">${content}</div><div class="message-time">${nowTime()}</div></div>`;
   area.appendChild(row);
   area.scrollTop = area.scrollHeight;
+  return row;
 }
 
 function showTyping() {
@@ -168,17 +169,41 @@ async function sendMessage() {
   showTyping();
 
   try {
+    const prompt = messages.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n') + '\nAssistant:';
     const res = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: MODEL, messages, stream: false })
+      body: JSON.stringify({ model: MODEL, prompt, stream: true })
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    const reply = data.message?.content || 'Réponse vide.';
+
     removeTyping();
-    addMessage('bot', reply);
-    messages.push({ role: 'assistant', content: reply });
+    const bubbleRow = addMessage('bot', '');
+    const bubble = bubbleRow.querySelector('.message-bubble');
+    let fullReply = '';
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const lines = decoder.decode(value, { stream: true }).split('\n').filter(l => l.trim());
+      for (const line of lines) {
+        try {
+          const data = JSON.parse(line);
+          if (data.response) {
+            fullReply += data.response;
+            bubble.innerHTML = marked.parse(fullReply);
+            document.getElementById('chat-area').scrollTop = document.getElementById('chat-area').scrollHeight;
+          }
+          if (data.done) break;
+        } catch {}
+      }
+    }
+
+    messages.push({ role: 'assistant', content: fullReply });
   } catch {
     removeTyping();
     addMessage('bot', `⚠️ Impossible de joindre le serveur d'inférence. Vérifiez que le serveur est démarré sur ${API_URL}`);
